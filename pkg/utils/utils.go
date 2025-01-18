@@ -12,6 +12,34 @@ const (
 	path = "assets/code.json"
 )
 
+func calculateErrors(snippetChars, typedChars []rune, cursorPos int) int {
+
+	errors := 0
+	for i := 0; i < cursorPos; i++ {
+		if typedChars[i] != snippetChars[i] {
+			errors++
+		}
+
+	}
+	return errors
+}
+
+func calculateAccuracy(snippetChars, typedChars []rune, cursorPos int) float64 {
+	correctChars := 0
+	for i := 0; i < cursorPos; i++ {
+		if typedChars[i] == snippetChars[i] {
+			correctChars++
+		}
+
+	}
+	return float64(correctChars) / float64(len(snippetChars)) * 100
+
+}
+func calculateWPM(snippetChars []rune, timeTaken time.Duration)float64 {
+	words := float64(len(snippetChars))/5.0
+	minutes := timeTaken.Minutes()
+	return words/minutes
+}
 func getRandomSnippet() (string, error) {
 
 	file, err := os.Open(path)
