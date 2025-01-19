@@ -92,3 +92,17 @@ func (s *Screen) width() int {
 	w, _ := s.screen.Size()
 	return w
 }
+
+func (s *Screen)WaitForStartOrExit()bool {
+	for {
+		ev := s.screen.PollEvent()
+		switch ev := ev.(type){
+			case *tcell.EventKey: 
+			if ev.Key() == tcell.KeyEnter{
+				return true
+			}else if ev.Key() == tcell.KeyEsc {
+				return false
+			}
+		}
+	}
+}
