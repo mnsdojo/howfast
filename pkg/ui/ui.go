@@ -64,12 +64,12 @@ func (s *Screen) DrawGameOver(snippet []rune) {
 	}
 }
 
-func (s *Screen)DrawStats(timeTaken time.Duration,errors int,accuracy float64,wpm float64){
+func (s *Screen) DrawStats(timeTaken time.Duration, errors int, accuracy float64, wpm float64) {
 	s.Clear()
 	stats := fmt.Sprintf("Time: %v | Errors: %d | Accuracy: %.2f%% | WPM: %.2f", timeTaken, errors, accuracy, wpm)
-	x := (s.width()-len(stats))/2
-	for i , char := range stats {
-				s.SetContent(x+i, 5, char, tcell.StyleDefault.Foreground(tcell.ColorYellow))
+	x := (s.width() - len(stats)) / 2
+	for i, char := range stats {
+		s.SetContent(x+i, 5, char, tcell.StyleDefault.Foreground(tcell.ColorYellow))
 	}
 	s.Show()
 }
@@ -107,9 +107,6 @@ func (s *Screen) HandleTypingInput(snippetRunes []rune, input *[]rune, cursorPos
 	return len(*input) == len(snippetRunes)
 }
 
-
-
-
 func (s *Screen) InitialScreen() {
 	s.Clear()
 
@@ -141,17 +138,40 @@ func (s *Screen) width() int {
 	return w
 }
 
-func (s *Screen)WaitForStartOrExit()bool {
+func (s *Screen) WaitForStartOrExit() bool {
 	for {
 		ev := s.screen.PollEvent()
-		switch ev := ev.(type){
-			case *tcell.EventKey: 
-			if ev.Key() == tcell.KeyEnter{
+		switch ev := ev.(type) {
+		case *tcell.EventKey:
+			if ev.Key() == tcell.KeyEnter {
 				return true
-			}else if ev.Key() == tcell.KeyEsc {
+			} else if ev.Key() == tcell.KeyEsc {
 				return false
 			}
 		}
 	}
 }
 
+
+func (s *Screen) WaitForRetryOrExit() bool {
+	retryText := "Press R to retry | Press ESC to exit"
+	x := (s.width() - len(retryText)) / 2
+
+	for i, char := range retryText {
+		s.SetContent(x+i, 7, char, tcell.StyleDefault.Foreground(tcell.ColorWhite))
+	}
+	s.Show()
+
+	// Wait for the user to press R or ESC
+	for {
+		ev := s.screen.PollEvent()
+		switch ev := ev.(type) {
+		case *tcell.EventKey:
+			if ev.Key() == tcell.KeyRune && (ev.Rune() == 'r' || ev.Rune() == 'R') {
+				return true // Retry the game
+			} else if ev.Key() == tcell.KeyEscape {
+				return false // Exit the program
+			}
+		}
+	}
+}
