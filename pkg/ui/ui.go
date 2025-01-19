@@ -13,12 +13,11 @@ type Screen struct {
 func NewScreen() *Screen {
 	s, err := tcell.NewScreen()
 	if err != nil {
-		log.Fatalf("Error creating screen :%v", err)
+		log.Fatalf("Error creating screen: %v", err)
 	}
 	if err := s.Init(); err != nil {
-		log.Fatalf("Error initializing screen : %v", err)
+		log.Fatalf("Error initializing screen: %v", err)
 	}
-
 	return &Screen{s}
 }
 
@@ -35,7 +34,7 @@ func (s *Screen) Show() {
 }
 
 func (s *Screen) SetContent(x, y int, char rune, style tcell.Style) {
-	s.screen.SetContent(x, y, char, nil, style)
+	s.screen.SetContent(x, y, char, nil, style) // Correct usage of SetContent
 }
 
 func (s *Screen) DrawSnippet(snippet []rune, input []rune, cursorPos int) {
@@ -43,16 +42,15 @@ func (s *Screen) DrawSnippet(snippet []rune, input []rune, cursorPos int) {
 		style := tcell.StyleDefault
 		if i < len(input) {
 			if input[i] == snippet[i] {
-				style = style.Foreground(tcell.ColorGreen)
+				style = style.Foreground(tcell.ColorGreen) // Correct character
 			} else {
-				style = style.Foreground(tcell.ColorRed)
+				style = style.Foreground(tcell.ColorRed) // Incorrect character
 			}
 		}
 		s.SetContent(i, 0, char, style)
-
 	}
 	if cursorPos < len(snippet) {
-		s.SetContent(cursorPos, 0, '|', tcell.StyleDefault)
+		s.SetContent(cursorPos, 0, '|', tcell.StyleDefault) // Draw cursor
 	}
 }
 
@@ -62,4 +60,35 @@ func (s *Screen) DrawGameOver(snippet []rune) {
 	for i, char := range gameOverText {
 		s.SetContent(x+i, 0, char, tcell.StyleDefault.Foreground(tcell.ColorYellow))
 	}
+}
+
+func (s *Screen) InitialScreen() {
+	s.Clear()
+
+	title := "Welcome to 'howfast' a typing test cli game"
+	instructions := "Press Enter to start | Press Esc to exit"
+	subInstructions := "Type the snippet as fast and accurately you can"
+
+	titleX := (s.width() - len(title)) / 2
+	instructionsX := (s.width() - len(instructions)) / 2
+	subInstructionsX := (s.width() - len(subInstructions)) / 2
+
+	for i, char := range title {
+		s.SetContent(titleX+i, 5, char, tcell.StyleDefault.Foreground(tcell.ColorYellow))
+	}
+
+	for i, char := range instructions {
+		s.SetContent(instructionsX+i, 7, char, tcell.StyleDefault.Foreground(tcell.ColorWhite))
+	}
+
+	for i, char := range subInstructions {
+		s.SetContent(subInstructionsX+i, 9, char, tcell.StyleDefault.Foreground(tcell.ColorGray))
+	}
+
+	s.Show()
+}
+
+func (s *Screen) width() int {
+	w, _ := s.screen.Size()
+	return w
 }

@@ -1,7 +1,9 @@
-package main 
+package main
 
+import "github.com/mnsdojo/howfast/pkg/ui"
 
-func main(){
-  
-	
+func main() {
+	screen := ui.NewScreen()
+	defer screen.Close()
+	screen.InitialScreen()
 }
