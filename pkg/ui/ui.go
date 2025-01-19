@@ -1,7 +1,9 @@
 package ui
 
 import (
+	"fmt"
 	"log"
+	"time"
 
 	"github.com/gdamore/tcell/v2"
 )
@@ -62,6 +64,52 @@ func (s *Screen) DrawGameOver(snippet []rune) {
 	}
 }
 
+func (s *Screen)DrawStats(timeTaken time.Duration,errors int,accuracy float64,wpm float64){
+	s.Clear()
+	stats := fmt.Sprintf("Time: %v | Errors: %d | Accuracy: %.2f%% | WPM: %.2f", timeTaken, errors, accuracy, wpm)
+	x := (s.width()-len(stats))/2
+	for i , char := range stats {
+				s.SetContent(x+i, 5, char, tcell.StyleDefault.Foreground(tcell.ColorYellow))
+	}
+	s.Show()
+}
+func (s *Screen) HandleTypingInput(snippetRunes []rune, input *[]rune, cursorPos *int) bool {
+	ev := s.screen.PollEvent()
+	switch ev := ev.(type) {
+	case *tcell.EventKey:
+		switch ev.Key() {
+		case tcell.KeyEscape:
+			return true // Exit the game
+		case tcell.KeyLeft:
+			if *cursorPos > 0 {
+				*cursorPos-- // Move cursor left
+			}
+		case tcell.KeyRight:
+			if *cursorPos < len(*input) {
+				*cursorPos++ // Move cursor right
+			}
+		case tcell.KeyBackspace, tcell.KeyBackspace2:
+			if *cursorPos > 0 {
+				// Remove the character before the cursor
+				*input = append((*input)[:*cursorPos-1], (*input)[*cursorPos:]...)
+				*cursorPos-- // Move cursor left
+			}
+		case tcell.KeyRune:
+			if *cursorPos < len(snippetRunes) {
+				// Insert the typed character at the cursor position
+				*input = append((*input)[:*cursorPos], append([]rune{ev.Rune()}, (*input)[*cursorPos:]...)...)
+				*cursorPos++ // Move cursor right
+			}
+		}
+	}
+
+	// Check if the player has finished typing
+	return len(*input) == len(snippetRunes)
+}
+
+
+
+
 func (s *Screen) InitialScreen() {
 	s.Clear()
 
@@ -106,3 +154,4 @@ func (s *Screen)WaitForStartOrExit()bool {
 		}
 	}
 }
+
